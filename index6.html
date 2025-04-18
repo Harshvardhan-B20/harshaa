@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style6.css">
+</head>
+<body>
+    
+    <div class="container mt-5">
+        <h1 class="text-center">Task Manager</h1>
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <form id="task-form">
+                    <div class="form-group">
+                        <input type="text" id="task-input" class="form-control" placeholder="Add a new task" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Add Task</button>
+                </form>
+                <ul id="task-list" class="list-group mt-3"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="script6.js"></script>
+</body>
+</html>
+
+<style>
+    body {
+    background-color: #a4afba;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+</style>
+
+<script>
+    $(document).ready(function() {
+  
+  loadTasks();
+
+  
+  $('#task-form').on('submit', function(e) {
+      e.preventDefault();
+      const taskInput = $('#task-input').val();
+      if (taskInput) {
+          const tasks = getTasks();
+          tasks.push({ id: Date.now(), name: taskInput });
+          saveTasks(tasks);
+          $('#task-input').val('');
+          loadTasks();
+      }
+  });
+
+ 
+  $('#task-list').on('click', '.edit-btn', function() {
+      const taskId = $(this).data('id');
+      const tasks = getTasks();
+      const task = tasks.find(t => t.id === taskId);
+      $('#task-input').val(task.name);
+      $(this).closest('li').remove();
+      saveTasks(tasks.filter(t => t.id !== taskId));
+  });
+
+  $('#task-list').on('click', '.delete-btn', function() {
+      const taskId = $(this).data('id');
+      const tasks = getTasks();
+      saveTasks(tasks.filter(t => t.id !== taskId));
+      loadTasks();
+  });
+
+
+  function loadTasks() {
+      const tasks = getTasks();
+      $('#task-list').empty();
+      tasks.forEach(task => {
+          $('#task-list').append(`
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                  ${task.name}
+                  <div>
+                      <button class="btn btn-warning btn-sm edit-btn" data-id="${task.id}">Edit</button>
+                      <button class="btn btn-danger btn-sm delete-btn" data-id="${task.id}">Delete</button>
+                  </div>
+              </li>
+          `);
+      });
+  }
+
+  
+  function getTasks() {
+      const tasks = localStorage.getItem('tasks');
+      return tasks ? JSON.parse(tasks) : [];
+  }
+
+  
+  function saveTasks(tasks) {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+  }
+});
+</script>
